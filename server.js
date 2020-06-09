@@ -22,14 +22,13 @@ var connection = mysql.createConnection({
     console.log(header)
     // run the start function after the connection is made to prompt the user
      
-    start();
-    //callEmployeeTable();
-     
-     //callDepartmentTable();
-     
-     //callRoleTable();
-    //console.log("Success");
+    startTable();
 });
+
+function startTable(){
+
+  start();
+};
 
 
 function start() {
@@ -48,25 +47,51 @@ function start() {
         "Update Employee Role",
         "Update Employee Manager",
         "View All Roles",
+        "View All Departments",
         "exit"
       ]
     })
     .then(function(answer) {
       switch (answer.action) {
-      case "Find songs by artist":
-        artistSearch();
+      case "View All Employees":
+        callEmployeeTable();
+        break;
+        
+      case "View All Employees by Department":
+          departSearch();
+          break;
+
+      case "View All Employees by Manager":
+        byManager();
         break;
 
-      case "Find all artists who appear more than once":
-        multiSearch();
+
+      case "Add Employees":
+        adder();
         break;
 
-      case "Find data within a specific range":
-        rangeSearch();
+      case "Remove Employees":
+        remover();
         break;
 
-      case "Search for a specific song":
-        songSearch();
+      case "Update Employees":
+        updateEmployee();
+        break;
+
+      case "Update Employee Role":
+        updateRole();
+        break;
+
+      case "Update Employee Manager":
+        updateManager();
+        break;
+
+      case "View All Roles":
+        callRoleTable();
+        break;
+
+        case "View All Departments":
+        callDepartmentTable();
         break;
 
       case "exit":
@@ -75,10 +100,6 @@ function start() {
       }
     });
 }
-
-
-
-
 
 
 function callEmployeeTable() {
@@ -100,6 +121,37 @@ function callEmployeeTable() {
     })
 };
 
+function departSearch(){
+  console.log('view all emplyees by department');
+
+};
+
+function byManager() {
+  console.log('View all employees by manager');
+
+};
+
+function adder() {
+  console.log('Add Employee');
+};
+
+function remover () {
+  console.log('Remove Employee');
+  };
+
+function updateEmployee() {
+  console.log('Update Employee');
+};
+
+function updateRole() {
+  console.log('Update Employee Role');
+};
+
+function updateManager() {
+  console.log('Update Manager');
+};
+
+
     function callRoleTable() {
         connection.query("SELECT * FROM role;", function(err, res) {
           if (err) throw err;
@@ -115,7 +167,7 @@ function callEmployeeTable() {
 
           }
           console.log(roleObj);
-          //return roleObj
+          return roleObj
         })
     };
 
@@ -132,63 +184,9 @@ function callEmployeeTable() {
                 departmentObj.push(departmentElm);
             }
             console.log(departmentObj);
-            //return departmentObj;
+            return departmentObj;
         })
     }
 
 
-//   function start() {
-//     inquirer
-//       .prompt({
-//         name: "postOrBid",
-//         type: "list",
-//         message: "Would you like to [POST] an auction or [BID] on an auction?",
-//         choices: ["POST", "BID", "EXIT"]
-//       })
-//       .then(function(answer) {
-//         // based on their answer, either call the bid or the post functions
-//         if (answer.postOrBid === "POST") {
-//           postAuction();
-//         }
-//         else if(answer.postOrBid === "BID") {
-//           bidAuction();
-//         } else{
-//           connection.end();
-//         }
-//       });
-//   }
-
-// readTables();
-// addElem();
-
-//   function readTables() {
-//     connection.query("SELECT * FROM role", function(err, res) {
-//       if (err) throw err;
-//       // Log all results of the SELECT statement
-//       console.log(res);
-//       connection.end();
-//     });
-//   }
-
-//   function addElem() {
-//     var query = connection.query(
-//       "INSERT INTO role SET ?",
-//       {
-//         title: "test",
-//         salary: 3.0,
-//         department_id: 50,
-        
-//       },
-//       function(err, res) {
-//         if (err) throw err;
-//         console.log(res.affectedRows + " product inserted!\n");
-//         // Call updateProduct AFTER the INSERT completes
-       
-//         console.log(query.sql);
-//         //connection.end();
-//         //readItems();
-
-//       }
-//     );
-//     };
-
+//  
