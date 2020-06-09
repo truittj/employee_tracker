@@ -19,7 +19,6 @@ var connection = mysql.createConnection({
   // connect to the mysql server and sql database
   connection.connect(function(err) {
     if (err) throw err;
-    console.log(header)
     // run the start function after the connection is made to prompt the user
      
     startTable();
@@ -43,7 +42,7 @@ function start() {
         "View All Employees by Manager",
         "Add Employees",
         "Remove Employee",
-        "Update Empolyee",
+        "Update Employee",
         "Update Employee Role",
         "Update Employee Manager",
         "View All Roles",
@@ -52,7 +51,7 @@ function start() {
       ]
     })
     .then(function(answer) {
-      switch (answer.action) {
+      switch (answer.start) {
       case "View All Employees":
         callEmployeeTable();
         break;
@@ -65,16 +64,15 @@ function start() {
         byManager();
         break;
 
-
       case "Add Employees":
         adder();
         break;
 
-      case "Remove Employees":
+      case "Remove Employee":
         remover();
         break;
-
-      case "Update Employees":
+      
+      case "Update Employee":
         updateEmployee();
         break;
 
@@ -116,39 +114,46 @@ function callEmployeeTable() {
             employeeElm.manager_id=res[i].manager_id;
             employeeObj.push(employeeElm)
         }
-        //console.log(employeeObj);
-        return employeeObj;
+        console.log(employeeObj);
+        //return employeeObj;
+        start();
     })
+    
 };
 
 function departSearch(){
   console.log('view all emplyees by department');
-
+  start();
 };
 
 function byManager() {
   console.log('View all employees by manager');
-
+  start();
 };
 
 function adder() {
   console.log('Add Employee');
+  start();
 };
 
-function remover () {
+function remover() {
   console.log('Remove Employee');
+  start();
   };
 
 function updateEmployee() {
   console.log('Update Employee');
+  start();
 };
 
 function updateRole() {
   console.log('Update Employee Role');
+  start();
 };
 
 function updateManager() {
   console.log('Update Manager');
+  start();
 };
 
 
@@ -167,8 +172,10 @@ function updateManager() {
 
           }
           console.log(roleObj);
-          return roleObj
+          start();
+          //return roleObj
         })
+        
     };
 
 
@@ -184,8 +191,10 @@ function updateManager() {
                 departmentObj.push(departmentElm);
             }
             console.log(departmentObj);
-            return departmentObj;
+            //return departmentObj;
+            start()
         })
+        ;
     }
 
 
