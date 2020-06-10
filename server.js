@@ -1,6 +1,7 @@
 const inquirer = require ("inquirer");
 const mysql = require ("mysql");
 const header = require("./Assets/opening.js");
+const cTable = require("console.table");
 
 var connection = mysql.createConnection({
     host: "localhost",
@@ -23,13 +24,7 @@ var connection = mysql.createConnection({
      
     startTable();
 });
-
-function startTable(){
-
-  start();
-};
-
-
+      
 function start() {
   inquirer
     .prompt({
@@ -114,9 +109,12 @@ function callEmployeeTable() {
             employeeElm.manager_id=res[i].manager_id;
             employeeObj.push(employeeElm)
         }
-        console.log(employeeObj);
+        var table = cTable.getTable(employeeObj);
+        
+        console.log(table);
+        //startTable(employeeObj);
         //return employeeObj;
-        start();
+
     })
     
 };
@@ -197,5 +195,8 @@ function updateManager() {
         ;
     }
 
-
+    function startTable(employeeObj) {
+      console.log(employeeObj);
+      start();
+      };
 //  
