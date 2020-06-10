@@ -22,7 +22,7 @@ var connection = mysql.createConnection({
     if (err) throw err;
     // run the start function after the connection is made to prompt the user
      
-    startTable();
+    start();
 });
       
 function start() {
@@ -130,7 +130,14 @@ function callEmployeeTable() {
 };
 
 function departSearch() {
-  connection.query("SELECT * FROM employee INNER JOIN role INNER JOIN department", function(err, res) {
+  connection.query(
+  `
+  SELECT employee.id, first_name, last_name as employee, title, salary as role, depart_name as department
+  FROM employee
+    LEFT JOIN role ON role_id = role.id
+    LEFT JOIN department ON department_id  = department.id 
+  ORDER BY department.depart_name;
+  `, function(err, res) {
     if (err) throw err;
   var tableDepart = cTable.getTable(res);
     console.log(tableDepart);
@@ -159,66 +166,67 @@ function byManager() {
   )};
 
 function adder() {
-  
+  var roleList = [];
   var managerList = [];
-  connection.query("SELECT first_name, last_name FROM employee", function(err, res) {
+  var call = connection.query("SELECT * FROM employee;", function(err, manager) {
     if (err) throw err;
-      for (var i = 0; i < res.length; i++) {
-        managerList.push(res[i].first_name + " " + res[i].last_name);
-      }
-      var roleList = [];
-      connection.query("SELECT title FROM role;", function(err, role) {
-        if (err) throw err;
-          for (var i = 0; i < role.length; i++) {
-            roleList.push(role[i].title);
-          }
-
-
-  inquirer
-  .prompt([
+    for (var i = 0; i < manager.length; i++) {
+    managerList.push(manager[i].first_name + " " + manager[i].last_name + " " + manager[i].manager_id);
+    }
+  var query = connection.query("SELECT * FROM role;", function(err, role) {
+    if (err) throw err;
+    for (var i = 0; i < role.length; i++) {
+    roleList.push(role[i].title + " " + role[i].id);
+    }
+  
+  inquirer.prompt([
     {
-      name: "first_name",
-      type: "input",
-      message: "What is the employee's first name?"
+        type: "input",
+        message: "Enter NEW employee FIRST name",
+        name: "first_name"
     },
     {
-      name: "last_name",
       type: "input",
-      message: "What is the employee's last name?"
+      message: "Enter NEW employee LAST name",
+      name: "last_name"
     },
     {
-      name: "role",
       type: "list",
-      message: "What is the employee's role?",
+      message: "Which Departent does the new role fall within?",
+      name: "id",
       choices: roleList
     },
     {
-      name: "manager",
       type: "list",
-      message: "Who is the employee's manager",
+      message: "Who is this employee's SUPERVISOR?",
+      name: "mId",
       choices: managerList
-    }
-  ])
-  .then(function(answer) {
-
-console.log(answer);
+    },
+  ]) .then ((answers) => {
+    var splitSTR = answers['id'].split(" ");            
+    var splitSecondSTR = answers['mId'].split(" ");            
 
     connection.query(
-      "INSERT INTO employee SET ?",
-      {
-        first_name: answer.first_name,
-        last_name: answer.last_name,
-        role_id: answer.role,
-        manager_id: answer.manager 
-      },
-      function(err) {
+      "INSERT employee SET ?",
+      [
+        {
+          first_name: answers.first_name,
+          last_name: answers.last_name,
+          role_id: splitSTR[1],
+          manager_id: splitSecondSTR[2]
+
+        }
+      ],
+      function(err, res) {
         if (err) throw err;
-        // re-prompt the user for if they want to bid or post
-        console.log('Add Employee');
+        console.log('New Employee Added');
+        
         start();
-      }
-    )
-})})})};
+        })
+      })
+    })
+    })
+}
 
 function remover() {
   var employeeList = [];
@@ -252,57 +260,50 @@ function updateEmployee() {
   inquirer.prompt([
     {
     type: "list",
-    message: "Would you like to ADD or REMOVE a role?",
-    choices: ["ADD", "REMOVE"],
+    message: "Would you like to UPDATE or REMOVE an EMPLOYEE?",
+    choices: ["UPDATE", "REMOVE"],
     name: "path",
     },
   ])
   .then((answer) => {
-      if (answer.path === "ADD") {
-        var departmentList = [];
-        var query = connection.query("SELECT * FROM department;", function(err, dep) {
-        if (err) throw err;
-        for (var i = 0; i < dep.length; i++) {
-        departmentList.push(dep[i].depart_name + " " + dep[i].id);
-        }
+      if (answer.path === "UPDATE") {
+        var employeeList = [];
+        var call = connection.query("SELECT * FROM employee;", function(err, manager) {
+          if (err) throw err;
+          for (var i = 0; i < manager.length; i++) {
+          employeeList.push(manager[i].first_name + " " + manager[i].last_name + " " + manager[i].manager_id + " " + manager[i].department_id);
+          }
         
         inquirer.prompt([
           {
-              type: "input",
-              message: "Enter NEW role",
-              name: "title"
-          },
-          {
-              type: "input",
-              message: "Enter Salary",
-              name: "salary"
-          },
-          {
             type: "list",
-            message: "Which Departent does the new role fall within?",
-            name: "id",
-            choices: departmentList
+            message: "Select an EMPLOYEE",
+            name: "eId",
+            choices: managerList
           },
         ]) .then ((answers) => {
           var splitSTR = answers['id'].split(" ");            
+          var splitSecondSTR = answers['mId'].split(" ");            
+
           connection.query(
-            "INSERT role SET ?",
+            "INSERT employee SET ?",
             [
               {
-                title: answers.title,
-                salary: answers.salary,
-                department_id:splitSTR[1]
+                first_name: answers.first_name,
+                last_name: answers.last_name,
+                role_id: splitSTR[1],
+                manager_id: splitSecondSTR[2]
+
               }
             ],
-            function(err, newRole) {
+            function(err, res) {
               if (err) throw err;
-              console.log('New Role Added');
-              var tableRole = cTable.getTable(newRole);
-              console.log(tableRole);
+              console.log('New Employee Added');
+              
               start();
               })
             })
-        })
+          })
       }  
       else {
         var roleList = [];
@@ -435,27 +436,27 @@ function updateManager() {
 };
 
 
-    function callRoleTable() {
-        connection.query("SELECT * FROM role;", function(err, res) {
-          if (err) throw err;
-          // Log all results of the SELECT statement
-          var roleObj=[];
-          for(var i=0; i<res.length; i++){
-            var roleElm={};
-            roleElm.id=res[i].id;
-            roleElm.title= res[i].title;
-            roleElm.salary=res[i].salary;
-            roleElm.department_id=res[i].department_id;
-            roleObj.push(roleElm)
+function callRoleTable() {
+    connection.query("SELECT * FROM role;", function(err, res) {
+      if (err) throw err;
+      // Log all results of the SELECT statement
+      var roleObj=[];
+      for(var i=0; i<res.length; i++){
+        var roleElm={};
+        roleElm.id=res[i].id;
+        roleElm.title= res[i].title;
+        roleElm.salary=res[i].salary;
+        roleElm.department_id=res[i].department_id;
+        roleObj.push(roleElm)
 
-          }
-          var table = cTable.getTable(roleObj);
-          console.log(table);
-          start();
-          //return roleObj
-        })
-        
-    };
+      }
+      var table = cTable.getTable(roleObj);
+      console.log(table);
+      start();
+      return roleObj
+    })
+    
+};
 
 
 function callDepartmentTable() {
@@ -471,12 +472,10 @@ function callDepartmentTable() {
           var table = cTable.getTable(departmentObj);
           console.log(table);
           start();
-            //return departmentObj;
+          return departmentObj;
         })
         ;
     }
 
-    function startTable() {
-      start();
-      };
+  
 //  
