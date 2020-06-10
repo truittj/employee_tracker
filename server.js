@@ -114,8 +114,13 @@ function callEmployeeTable() {
       ORDER BY 
       e.id;`,
       function(err, managerObj) {
+        //console.log(managerObj);
         if (err) throw err;
-        var tableEmployee = cTable.getTable(res, ...managerObj);
+        var employeeArr = res.map((employeeObj, index)=>{
+          return {...employeeObj, manager: managerObj[index].Manager}
+        });
+
+        var tableEmployee = cTable.getTable(employeeArr);
         console.log(tableEmployee);
         start();
         //return employeeObj;
