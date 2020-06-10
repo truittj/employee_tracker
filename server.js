@@ -110,19 +110,22 @@ function callEmployeeTable() {
             employeeObj.push(employeeElm)
         }
         var table = cTable.getTable(employeeObj);
-        
         console.log(table);
-        //startTable(employeeObj);
+        start();
         //return employeeObj;
 
     })
     
 };
 
-function departSearch(){
-  console.log('view all emplyees by department');
+function departSearch() {
+  connection.query("SELECT * FROM employee INNER JOIN role INNER JOIN department", function(err, res) {
+    if (err) throw err;
+  var tableDepart = cTable.getTable(res);
+    console.log(tableDepart);
   start();
-};
+  }
+)};
 
 function byManager() {
   console.log('View all employees by manager');
@@ -130,8 +133,61 @@ function byManager() {
 };
 
 function adder() {
-  console.log('Add Employee');
-  start();
+
+    connection.query("SELECT title FROM role", function(err, role) {
+      if (err) throw err;
+      var roleList= role;
+      console.log(roleList);
+
+      connection.query("SELECT first_name, last_name FROM employee", function(err, res) {
+        if (err) throw err;
+        var managerList= res;
+        console.log(managerList);
+  inquirer
+  .prompt([
+    {
+      name: "first_name",
+      type: "input",
+      message: "What is the employee's first name?"
+    },
+    {
+      name: "last_name",
+      type: "input",
+      message: "What is the employee's last name?"
+    },
+    {
+      name: "role",
+      type: "list",
+      message: "What is the employee's role?",
+      choices: roleList
+    },
+    {
+      name: "manager",
+      type: "list",
+      message: "Who is the employee's manager",
+      choices: managerList
+    },
+    
+  ])
+  .then(function(answer) {
+    // when finished prompting, insert a new item into the db with that info
+    connection.query(
+      "INSERT INTO auctions SET ?",
+      {
+        item_name: answer.item,
+        category: answer.category,
+        starting_bid: answer.startingBid || 0,
+        highest_bid: answer.startingBid || 0
+      },
+      function(err) {
+        if (err) throw err;
+        console.log("Your auction was created successfully!");
+        // re-prompt the user for if they want to bid or post
+        console.log('Add Employee');
+        start();
+      }
+    );
+  });
 };
 
 function remover() {
@@ -169,7 +225,8 @@ function updateManager() {
             roleObj.push(roleElm)
 
           }
-          console.log(roleObj);
+          var table = cTable.getTable(roleObj);
+          console.log(table);
           start();
           //return roleObj
         })
@@ -184,13 +241,14 @@ function updateManager() {
               for(var i=0; i<res.length; i++){
                 var departmentElm={};
                 departmentElm.id=res[i].id;
-                departmentElm.name = res[i].name;
+                departmentElm.name = res[i].depart_name;
                 
                 departmentObj.push(departmentElm);
             }
-            console.log(departmentObj);
+            var table = cTable.getTable(departmentObj);
+            console.log(table);
+            start();
             //return departmentObj;
-            start()
         })
         ;
     }
