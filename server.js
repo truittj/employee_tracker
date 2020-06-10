@@ -243,22 +243,21 @@ function updateEmployee() {
 };
 
 function updateRole() {
-  inquirer
-  .prompt([
+  inquirer.prompt([
       {
       type: "list",
       message: "Would you like to ADD or REMOVE a role?",
       choices: ["ADD", "REMOVE"],
       name: "path",
-      }
+      },
     ])
-    .then(function (answer) {
+    .then((answer) => {
         if (answer.path === "ADD") {
           var departmentList = [];
-          connection.query("SELECT depart_name, department.id FROM department", function(err, dep) {
+          var query = connection.query("SELECT * FROM department;", function(err, dep) {
           if (err) throw err;
           for (var i = 0; i < dep.length; i++) {
-          departmentList.push(dep[i].depart_name + " " + dep[i].department.id);
+          departmentList.push(dep[i].depart_name + " " + dep[i].id);
           }
           
           inquirer.prompt([
@@ -275,18 +274,18 @@ function updateRole() {
             {
               type: "list",
               message: "Which Departent does the new role fall within?",
-              name: "department_id",
+              name: "id",
               choices: departmentList
             },
           ]) .then ((answers) => {
-            console.log(answers, answers.department_id)
+            var splitSTR = answers['id'].split(" ");            
             connection.query(
               "INSERT role SET ?",
               [
                 {
                   title: answers.title,
                   salary: answers.salary,
-                  department_id:answers.department_id
+                  department_id:splitSTR[1]
                 }
               ],
               function(err, newRole) {
