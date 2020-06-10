@@ -132,64 +132,66 @@ function byManager() {
   start();
 };
 
-// function adder() {
+function adder() {
   
-//   inquirer
-//   .prompt([
-//     {
-//       name: "first_name",
-//       type: "input",
-//       message: "What is the employee's first name?"
-//     },
-//     {
-//       name: "last_name",
-//       type: "input",
-//       message: "What is the employee's last name?"
-//     },
-//     {
-//       name: "role",
-//       type: "list",
-//       message: "What is the employee's role?",
-//       choices: 
-//       () => connection.query("SELECT title FROM role", function(err, role) {
-//         if (err) throw err;
-//         console.log(role);
-//         return role;
-//       })
-//     },
-//     {
-//       name: "manager",
-//       type: "list",
-//       message: "Who is the employee's manager",
-//       choices: 
-      
-//       () => connection.query("SELECT first_name, last_name FROM employee", function(err, res) {
-//         if (err) throw err;
-//         console.log(res);
-//         return res;
-//       })
-//     }
-//   ])
-//   .then(function(answer) {
-//     // when finished prompting, insert a new item into the db with that info
-//     connection.query(
-//       "INSERT INTO employee SET ?",
-//       {
-//         first_name: answer.first_name,
-//         last_name: answer.last_name,
+  var managerList = [];
+  connection.query("SELECT first_name, last_name FROM employee", function(err, res) {
+    if (err) throw err;
+      for (var i = 0; i < res.length; i++) {
+        managerList.push(res[i].first_name + " " + res[i].last_name);
+      }
+      var roleList = [];
+      connection.query("SELECT title FROM role;", function(err, role) {
+        if (err) throw err;
+          for (var i = 0; i < role.length; i++) {
+            roleList.push(role[i].title);
+          }
 
-//         role_id: answer.role,
-//         manager_id: answer.manager 
-//       },
-//       function(err) {
-//         if (err) throw err;
-//         console.log("Your auction was created successfully!");
-//         // re-prompt the user for if they want to bid or post
-//         console.log('Add Employee');
-//         start();
-//       }
-//     )
-// })};
+
+  inquirer
+  .prompt([
+    {
+      name: "first_name",
+      type: "input",
+      message: "What is the employee's first name?"
+    },
+    {
+      name: "last_name",
+      type: "input",
+      message: "What is the employee's last name?"
+    },
+    {
+      name: "role",
+      type: "list",
+      message: "What is the employee's role?",
+      choices: roleList
+    },
+    {
+      name: "manager",
+      type: "list",
+      message: "Who is the employee's manager",
+      choices: managerList
+    }
+  ])
+  .then(function(answer) {
+    // when finished prompting, insert a new item into the db with that info
+    connection.query(
+      "INSERT INTO employee SET ?",
+      {
+        first_name: answer.first_name,
+        last_name: answer.last_name,
+
+        role_id: answer.role,
+        manager_id: answer.manager 
+      },
+      function(err) {
+        if (err) throw err;
+        // re-prompt the user for if they want to bid or post
+        console.log('Add Employee');
+        start();
+      }
+    )
+})})})};
 
 function remover() {
   var employeeList = [];
@@ -197,7 +199,6 @@ function remover() {
     if (err) throw err;
       for (var i = 0; i < res.length; i++) {
         employeeList.push(res[i].first_name + " " + res[i].last_name);
-        console.log(employeeList);
       }
   inquirer
   .prompt ([
