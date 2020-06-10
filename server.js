@@ -96,26 +96,32 @@ function start() {
 
 
 function callEmployeeTable() {
-    connection.query("SELECT * FROM employee;", function(err, res) {
+    connection.query(
+    `SELECT employee.id, first_name, last_name as employee, title, salary as role, depart_name as department
+      FROM employee
+        LEFT JOIN role ON role_id = role.id
+        LEFT JOIN department ON department_id  = department.id 
+      ORDER BY employee.id`, 
+    function(err, res) {
       if (err) throw err;
-
-        var employeeObj = [];
-        for(var i=0; i<res.length; i++){
-            var employeeElm= {};
-            employeeElm.id=res[i].id;
-            employeeElm.first_name=res[i].first_name;
-            employeeElm.last_name=res[i].last_name;
-            employeeElm.role_id=res[i].role_id;
-            employeeElm.manager_id=res[i].manager_id;
-            employeeObj.push(employeeElm)
-        }
-        var table = cTable.getTable(employeeObj);
-        console.log(table);
+      connection.query(`
+      SELECT 
+        CONCAT(m.last_Name, ', ', m.first_Name) AS Manager
+      FROM
+        employee e
+      LEFT JOIN employee m ON 
+        m.manager_id = e.id
+      ORDER BY 
+      e.id;`,
+      function(err, managerObj) {
+        if (err) throw err;
+        var tableEmployee = cTable.getTable(res, ...managerObj);
+        console.log(tableEmployee);
         start();
         //return employeeObj;
 
     })
-    
+  })
 };
 
 function departSearch() {
@@ -238,8 +244,91 @@ function remover() {
 )};
 
 function updateEmployee() {
-  console.log('Update Employee');
-  start();
+  inquirer.prompt([
+    {
+    type: "list",
+    message: "Would you like to ADD or REMOVE a role?",
+    choices: ["ADD", "REMOVE"],
+    name: "path",
+    },
+  ])
+  .then((answer) => {
+      if (answer.path === "ADD") {
+        var departmentList = [];
+        var query = connection.query("SELECT * FROM department;", function(err, dep) {
+        if (err) throw err;
+        for (var i = 0; i < dep.length; i++) {
+        departmentList.push(dep[i].depart_name + " " + dep[i].id);
+        }
+        
+        inquirer.prompt([
+          {
+              type: "input",
+              message: "Enter NEW role",
+              name: "title"
+          },
+          {
+              type: "input",
+              message: "Enter Salary",
+              name: "salary"
+          },
+          {
+            type: "list",
+            message: "Which Departent does the new role fall within?",
+            name: "id",
+            choices: departmentList
+          },
+        ]) .then ((answers) => {
+          var splitSTR = answers['id'].split(" ");            
+          connection.query(
+            "INSERT role SET ?",
+            [
+              {
+                title: answers.title,
+                salary: answers.salary,
+                department_id:splitSTR[1]
+              }
+            ],
+            function(err, newRole) {
+              if (err) throw err;
+              console.log('New Role Added');
+              var tableRole = cTable.getTable(newRole);
+              console.log(tableRole);
+              start();
+              })
+            })
+        })
+      }  
+      else {
+        var roleList = [];
+        connection.query("SELECT title FROM role", function(err, role) {
+          if (err) throw err;
+          for (var i = 0; i < role.length; i++) {
+          roleList.push(role[i].title);
+            }
+        inquirer
+        .prompt ([
+          {
+            type: "list",
+            message: "Which ROLE would you like to delete?",
+            name: "employee",
+            choices: roleList
+          },
+        ])
+        .then (function(res) {
+          connection.query("DELETE FROM role WHERE ?",
+              {
+                title: res.roleList
+              },
+              function(err, res) {
+              if (err) throw err;
+              console.log( "Role was removed");
+              start();
+              });
+            });
+        })
+      };
+  })
 };
 
 function updateRole() {
