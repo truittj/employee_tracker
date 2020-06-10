@@ -174,13 +174,14 @@ function adder() {
     }
   ])
   .then(function(answer) {
-    // when finished prompting, insert a new item into the db with that info
+
+console.log(answer);
+
     connection.query(
       "INSERT INTO employee SET ?",
       {
         first_name: answer.first_name,
         last_name: answer.last_name,
-
         role_id: answer.role,
         manager_id: answer.manager 
       },
@@ -260,20 +261,19 @@ function updateManager() {
     };
 
 
-        function callDepartmentTable() {
-            connection.query("SELECT * FROM department;", function(err, res) {
-              if (err) throw err;
-              var departmentObj=[];
-              for(var i=0; i<res.length; i++){
-                var departmentElm={};
-                departmentElm.id=res[i].id;
-                departmentElm.name = res[i].depart_name;
-                
-                departmentObj.push(departmentElm);
-            }
-            var table = cTable.getTable(departmentObj);
-            console.log(table);
-            start();
+function callDepartmentTable() {
+   connection.query("SELECT * FROM department;", function(err, res) {
+    if (err) throw err;
+    var departmentObj=[];
+    for(var i=0; i<res.length; i++){
+      var departmentElm={};
+      departmentElm.id=res[i].id;
+      departmentElm.name = res[i].depart_name;            
+      departmentObj.push(departmentElm);
+        }
+          var table = cTable.getTable(departmentObj);
+          console.log(table);
+          start();
             //return departmentObj;
         })
         ;
