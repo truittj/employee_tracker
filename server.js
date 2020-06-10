@@ -87,7 +87,7 @@ function start() {
         callDepartmentTable();
         break;
 
-      case "exit":
+      case "Exit":
         connection.end();
         break;
       }
@@ -193,11 +193,11 @@ function byManager() {
 
 function remover() {
   var employeeList = [];
-  connection.query(
-    "SELECT first_name, last_name FROM employees", function(err, res) {
+  connection.query("SELECT first_name, last_name FROM employee", function(err, res) {
+    if (err) throw err;
       for (var i = 0; i < res.length; i++) {
         employeeList.push(res[i].first_name + " " + res[i].last_name);
-      console.log(employeeList);
+        console.log(employeeList);
       }
   inquirer
   .prompt ([
@@ -209,8 +209,8 @@ function remover() {
     },
   ])
   .then (function(res) {
-    var query = connection.query(
-      `DELETE FROM employees WHERE concat(first_name, ' ' ,last_name) = '${res.employee}'`,
+    connection.query(
+      `DELETE FROM employee WHERE concat(first_name, ' ' ,last_name) = '${res.employee}'`,
         function(err, res) {
         if (err) throw err;
         console.log( "Employee removed");
