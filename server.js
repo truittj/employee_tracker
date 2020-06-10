@@ -38,11 +38,11 @@ function start() {
         "Add Employees",
         "Remove Employee",
         "Update Employee",
-        "Update Employee Role",
+        "Update Role",
         "Update Employee Manager",
         "View All Roles",
         "View All Departments",
-        "exit"
+        "Exit"
       ]
     })
     .then(function(answer) {
@@ -71,7 +71,7 @@ function start() {
         updateEmployee();
         break;
 
-      case "Update Employee Role":
+      case "Update Role":
         updateRole();
         break;
 
@@ -127,10 +127,25 @@ function departSearch() {
   }
 )};
 
-function byManager() {
-  console.log('View all employees by manager');
-  start();
-};
+function byManager() { 
+  connection.query(`  
+  SELECT
+  CONCAT(m.last_Name, ', ', m.first_Name) AS Manager,
+  CONCAT(e.last_Name, ', ', e.first_Name) AS 'Direct report'
+  FROM
+  employee e
+  INNER JOIN employee m ON
+  m.manager_id = e.id
+  ORDER BY
+  Manager;
+  `, function(err, res) {
+    if (err) throw err;
+    var tableByManager = cTable.getTable(res);
+    console.log(tableByManager);  
+    console.log('View all employees by manager');
+    start();
+    }
+  )};
 
 function adder() {
   
@@ -228,11 +243,100 @@ function updateEmployee() {
 };
 
 function updateRole() {
-  console.log('Update Employee Role');
-  start();
-};
+  inquirer
+  .prompt([
+      {
+      type: "list",
+      message: "Would you like to ADD or REMOVE a role?",
+      choices: ["ADD", "REMOVE"],
+      name: "path",
+      }
+    ])
+    .then(function (answer) {
+        if (answer.path === "ADD") {
+          var departmentList = [];
+          connection.query("SELECT depart_name, department.id FROM department", function(err, dep) {
+          if (err) throw err;
+          for (var i = 0; i < dep.length; i++) {
+          departmentList.push(dep[i].depart_name + " " + dep[i].department.id);
+          }
+          
+          inquirer.prompt([
+            {
+                type: "input",
+                message: "Enter NEW role",
+                name: "title"
+            },
+            {
+                type: "input",
+                message: "Enter Salary",
+                name: "salary"
+            },
+            {
+              type: "list",
+              message: "Which Departent does the new role fall within?",
+              name: "department_id",
+              choices: departmentList
+            },
+          ]) .then ((answers) => {
+            console.log(answers, answers.department_id)
+            connection.query(
+              "INSERT role SET ?",
+              [
+                {
+                  title: answers.title,
+                  salary: answers.salary,
+                  department_id:answers.department_id
+                }
+              ],
+              function(err, newRole) {
+                if (err) throw err;
+                console.log('New Role Added');
+                var tableRole = cTable.getTable(newRole);
+                console.log(tableRole);
+                start();
+                })
+              })
+          })
+        }  
+        else {
+          var roleList = [];
+          connection.query("SELECT title FROM role", function(err, role) {
+            if (err) throw err;
+            for (var i = 0; i < role.length; i++) {
+            roleList.push(role[i].title);
+              }
+          inquirer
+          .prompt ([
+            {
+              type: "list",
+              message: "Which ROLE would you like to delete?",
+              name: "employee",
+              choices: roleList
+            },
+          ])
+          .then (function(res) {
+            connection.query("DELETE FROM role WHERE ?",
+                {
+                  title: res.roleList
+                },
+                function(err, res) {
+                if (err) throw err;
+                console.log( "Role was removed");
+                start();
+                });
+              });
+          })
+        };
+    })
+  };
 
 function updateManager() {
+  
+
+  
+  
+  
   console.log('Update Manager');
   start();
 };
@@ -279,8 +383,7 @@ function callDepartmentTable() {
         ;
     }
 
-    function startTable(employeeObj) {
-      console.log(employeeObj);
+    function startTable() {
       start();
       };
 //  
