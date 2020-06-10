@@ -37,7 +37,6 @@ function start() {
         "View All Employees by Manager",
         "Add Employees",
         "Remove Employee",
-        "Update Employee",
         "Update Role",
         "Update Employee Manager",
         "View All Roles",
@@ -65,10 +64,6 @@ function start() {
 
       case "Remove Employee":
         remover();
-        break;
-      
-      case "Update Employee":
-        updateEmployee();
         break;
 
       case "Update Role":
@@ -255,87 +250,6 @@ function remover() {
       });
     }
 )};
-
-function updateEmployee() {
-  inquirer.prompt([
-    {
-    type: "list",
-    message: "Would you like to UPDATE or REMOVE an EMPLOYEE?",
-    choices: ["UPDATE", "REMOVE"],
-    name: "path",
-    },
-  ])
-  .then((answer) => {
-      if (answer.path === "UPDATE") {
-        var employeeList = [];
-        var call = connection.query("SELECT * FROM employee;", function(err, manager) {
-          if (err) throw err;
-          for (var i = 0; i < manager.length; i++) {
-          employeeList.push(manager[i].first_name + " " + manager[i].last_name + " " + manager[i].manager_id + " " + manager[i].department_id);
-          }
-        
-        inquirer.prompt([
-          {
-            type: "list",
-            message: "Select an EMPLOYEE",
-            name: "eId",
-            choices: managerList
-          },
-        ]) .then ((answers) => {
-          var splitSTR = answers['id'].split(" ");            
-          var splitSecondSTR = answers['mId'].split(" ");            
-
-          connection.query(
-            "INSERT employee SET ?",
-            [
-              {
-                first_name: answers.first_name,
-                last_name: answers.last_name,
-                role_id: splitSTR[1],
-                manager_id: splitSecondSTR[2]
-
-              }
-            ],
-            function(err, res) {
-              if (err) throw err;
-              console.log('New Employee Added');
-              
-              start();
-              })
-            })
-          })
-      }  
-      else {
-        var roleList = [];
-        connection.query("SELECT title FROM role", function(err, role) {
-          if (err) throw err;
-          for (var i = 0; i < role.length; i++) {
-          roleList.push(role[i].title);
-            }
-        inquirer
-        .prompt ([
-          {
-            type: "list",
-            message: "Which ROLE would you like to delete?",
-            name: "employee",
-            choices: roleList
-          },
-        ])
-        .then (function(res) {
-          connection.query("DELETE FROM role WHERE ?",
-              {
-                title: res.roleList
-              },
-              function(err, res) {
-              if (err) throw err;
-              console.log( "Role was removed");
-              start();
-              });
-            });
-        })
-      };
-  })
-};
 
 function updateRole() {
   inquirer.prompt([
