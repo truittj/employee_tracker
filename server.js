@@ -17,10 +17,8 @@ var connection = mysql.createConnection({
     database: "employee_tracker_db"
   });
   
-  // connect to the mysql server and sql database
   connection.connect(function(err) {
     if (err) throw err;
-    // run the start function after the connection is made to prompt the user
      
     start();
 });
@@ -105,11 +103,10 @@ function callEmployeeTable() {
       FROM
         employee e
       LEFT JOIN employee m ON 
-        m.manager_id = e.id
+        e.id = m.manager_id 
       ORDER BY 
       e.id;`,
       function(err, managerObj) {
-        //console.log(managerObj);
         if (err) throw err;
         var employeeArr = res.map((employeeObj, index)=>{
           return {...employeeObj, manager: managerObj[index].Manager}
@@ -200,7 +197,6 @@ function adder() {
   ]) .then ((answers) => {
     var splitSTR = answers['id'].split(" ");            
     var splitSecondSTR = answers['mId'].split(" ");            
-    console.log(splitSTR);
     connection.query(
       "INSERT employee SET ?",
       [
@@ -301,7 +297,6 @@ function updateRole() {
                 if (err) throw err;
                 console.log('New Role Added');
                 var tableRole = cTable.getTable(newRole);
-                console.log(tableRole);
                 start();
                 })
               })
@@ -355,10 +350,8 @@ function updateManager() {
         if (err) throw err;
         for (var i = 0; i < man.length; i++) {
         managerList.push(man[i].id + " " + man[i].first_name + " " + man[i].last_name + " " + man[i].manager_id);
-        // var tableManager = cTable.getTable(managerList);
-        // console.log(tableManager);
+        
         }
-        console.log(managerList);
         inquirer.prompt([
           {
               type: "list",
@@ -374,7 +367,7 @@ function updateManager() {
         },
         ]) .then ((answers) => {
           var splitSTR = answers['mId'].split(" ");
-          var splitSTR = answers['sId'].split(" ");            
+          var splitSecondSTR = answers['sId'].split(" ");            
             
           connection.query(
             "UPDATE employee SET ? WHERE employee.id = ?;",
@@ -383,7 +376,7 @@ function updateManager() {
                 manager_id:splitSTR[3]
               },
               {
-                id:splitSTR[0]
+                id:splitSecondSTR[0]
               }
             ],
             function(err, newRole) {
@@ -400,7 +393,6 @@ function updateManager() {
         if (err) throw err;
         for (var i = 0; i < man.length; i++) {
         managerList.push(man[i].id + " " + man[i].first_name + " " + man[i].last_name + " " + man[i].manager_id);
-        console.log(managerList);
         }
         inquirer.prompt ([
           {
