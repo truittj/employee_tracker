@@ -5,11 +5,11 @@
 
 ## Description
 
-undefined
+Using mySQL, Node.js, and NPM packages, I created a node based application that tracks employees. The employees and their job related functions are kept up-to-date in mySQL databases. The dynamic functionality is created in JavaScript. Node, which is using Express and mysql dependincies is where the user will interface with the application. 
 
 ## Current Version 
 
-undefined
+1.0.0
 
 ## Table of Contents
 

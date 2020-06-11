@@ -145,7 +145,7 @@ function byManager() {
   FROM
   employee e
   LEFT JOIN employee m ON
-  m.manager_id = e.id
+   e.id = m.manager_id
   ORDER BY
   Manager;
   `, function(err, res) {
@@ -368,9 +368,8 @@ function updateManager() {
         ]) .then ((answers) => {
           var splitSTR = answers['mId'].split(" ");
           var splitSecondSTR = answers['sId'].split(" ");            
-            
           connection.query(
-            "UPDATE employee SET ? WHERE employee.id = ?;",
+            "UPDATE employee SET ? WHERE ?;",
             [
               {
                 manager_id:splitSTR[3]
