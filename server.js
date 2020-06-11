@@ -92,7 +92,7 @@ function start() {
 
 function callEmployeeTable() {
     connection.query(
-    `SELECT employee.id, first_name, last_name as employee, title, salary as role, depart_name as department
+    `SELECT employee.id, first_name, last_name, title, salary, depart_name
       FROM employee
         LEFT JOIN role ON role_id = role.id
         LEFT JOIN department ON department_id  = department.id 
@@ -127,7 +127,7 @@ function callEmployeeTable() {
 function departSearch() {
   connection.query(
   `
-  SELECT employee.id, first_name, last_name as employee, title, salary as role, depart_name as department
+  SELECT employee.id, first_name, last_name, title, salary, depart_name
   FROM employee
     LEFT JOIN role ON role_id = role.id
     LEFT JOIN department ON department_id  = department.id 
@@ -147,7 +147,7 @@ function byManager() {
   CONCAT(e.last_Name, ', ', e.first_Name) AS 'Direct report'
   FROM
   employee e
-  INNER JOIN employee m ON
+  LEFT JOIN employee m ON
   m.manager_id = e.id
   ORDER BY
   Manager;
@@ -162,6 +162,7 @@ function byManager() {
 
 function adder() {
   var managerList = [];
+  var roleList = [];
   var call = connection.query("SELECT * FROM employee;", function(err, manager) {
     if (err) throw err;
     for (var i = 0; i < manager.length; i++) {
@@ -199,7 +200,7 @@ function adder() {
   ]) .then ((answers) => {
     var splitSTR = answers['id'].split(" ");            
     var splitSecondSTR = answers['mId'].split(" ");            
-
+    console.log(splitSTR);
     connection.query(
       "INSERT employee SET ?",
       [
