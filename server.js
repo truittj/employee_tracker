@@ -161,7 +161,6 @@ function byManager() {
   )};
 
 function adder() {
-  var roleList = [];
   var managerList = [];
   var call = connection.query("SELECT * FROM employee;", function(err, manager) {
     if (err) throw err;
@@ -340,14 +339,89 @@ function updateRole() {
   };
 
 function updateManager() {
-  
+  inquirer.prompt([
+    {
+    type: "list",
+    message: "Would you like to UPDATE a manager or REMOVE a manager's privilages?",
+    choices: ["UPDATE", "REMOVE"],
+    name: "path",
+    },
+  ])
+  .then((answer) => {
+      if (answer.path === "UPDATE") {
+        var managerList = [];
+        var query = connection.query("SELECT * FROM employee;", function(err, man) {
+        if (err) throw err;
+        for (var i = 0; i < man.length; i++) {
+        managerList.push(man[i].id + " " + man[i].first_name + " " + man[i].last_name + " " + man[i].manager_id);
+        // var tableManager = cTable.getTable(managerList);
+        // console.log(tableManager);
+        }
+        console.log(managerList);
+        inquirer.prompt([
+          {
+              type: "list",
+              message: "Who do you want to ASSIGN as a manager?",
+              name: "mId",
+              choices: managerList
+          },
+          {
+            type: "list",
+            message: "Who is their SUBORDOINATE?",
+            name: "sId",
+            choices: managerList
+        },
+        ]) .then ((answers) => {
+          var splitSTR = answers['mId'].split(" ");
+          var splitSTR = answers['sId'].split(" ");            
+            
+          connection.query(
+            "UPDATE employee SET ? WHERE employee.id = ?;",
+            [
+              {
+                manager_id:splitSTR[3]
+              },
+              {
+                id:splitSTR[0]
+              }
+            ],
+            function(err, newRole) {
+              if (err) throw err;
+              console.log('New Manager Assigned');
+              start();
+              })
+            })
+        })
+      }  
+      else {
+        var managerList = [];
+        connection.query("SELECT * FROM employee;", function(err, man) {
+        if (err) throw err;
+        for (var i = 0; i < man.length; i++) {
+        managerList.push(man[i].id + " " + man[i].first_name + " " + man[i].last_name + " " + man[i].manager_id);
+        console.log(managerList);
+        }
+        inquirer.prompt ([
+          {
+            type: "list",
+            message: "Select the employee to REMOVE privlagies from",
+            name: "demoted",
+            choices: managerList
+          },
+        ])
+        .then (function(res) {
+          var splitSTR = res['demoted'].split(" ");            
 
-  
-  
-  
-  console.log('Update Manager');
-  start();
-};
+          connection.query("UPDATE employee SET manager_id = NULL WHERE employee.id=" + splitSTR[0],
+              function(err, res) {
+              if (err) throw err;
+              console.log( "Role was removed");
+              start();
+              });
+            });
+        }
+      )
+  }})};
 
 
 function callRoleTable() {
@@ -390,6 +464,4 @@ function callDepartmentTable() {
         })
         ;
     }
-
-  
-//  
+ 
